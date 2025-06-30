@@ -97,6 +97,13 @@ function renderMap() {
   const map = document.getElementById('game-map');
   map.innerHTML = '';
 
+  // Get actual map size for positioning
+  const mapRect = map.getBoundingClientRect();
+  const mapWidth = map.offsetWidth;
+  const mapHeight = map.offsetHeight;
+  const divWidth = 112; // w-28 = 7rem = 112px
+  const divHeight = 80; // h-20 = 5rem = 80px
+
   // Determine attackable neighbors if a player-owned territory is selected
   let attackableIds = [];
   if (gameData.selectedOwnedTerritoryId) {
@@ -136,8 +143,9 @@ function renderMap() {
     const div = document.createElement('div');
     div.className = `rounded-lg shadow-md flex flex-col items-center justify-center p-2 w-28 h-20 text-xs sm:text-sm md:text-base absolute ${textColor} ${border} ${extraStyle}`;
     div.style.background = bgColor;
-    div.style.left = `calc(${territory.x}% - 56px)`; // 56px = half of w-28
-    div.style.top = `calc(${territory.y}% - 40px)`;  // 40px = half of h-20
+    // Calculate position based on map size and territory x/y
+    div.style.left = `${(territory.x / 100) * mapWidth - divWidth / 2}px`;
+    div.style.top = `${(territory.y / 100) * mapHeight - divHeight / 2}px`;
     div.innerHTML = `<div class=\"font-bold text-center\">${territory.name}</div><div>Strength: ${territory.strength}</div>`;
     if (clickable && gameData.currentPlayerId === gameData.playerKingdomId) {
       div.classList.add('cursor-pointer');
