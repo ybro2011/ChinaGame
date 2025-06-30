@@ -5,17 +5,23 @@ const initialKingdoms = [
   { id: "wu", name: "Wu Kingdom", color: "#f56565", type: "ai", units: 10 },
 ];
 
-// --- Original 9-territory map ---
+// --- 15-province map with grid positions ---
 const initialTerritories = [
-  { id: "T1", name: "Northern Plains", ownerId: "wei", strength: 4, neighbors: ["T2", "T4"] },
-  { id: "T2", name: "Central Hills", ownerId: "wei", strength: 3, neighbors: ["T1", "T3", "T5"] },
-  { id: "T3", name: "Eastern Coast", ownerId: "wei", strength: 4, neighbors: ["T2", "T6"] },
-  { id: "T4", name: "Western Mountains", ownerId: "shu", strength: 5, neighbors: ["T1", "T5", "T7"] },
-  { id: "T5", name: "Heartland", ownerId: "neutral", strength: 3, neighbors: ["T2", "T4", "T6", "T8"] },
-  { id: "T6", name: "Southern Coast", ownerId: "wu", strength: 4, neighbors: ["T3", "T5", "T9"] },
-  { id: "T7", name: "Southwest Jungles", ownerId: "shu", strength: 4, neighbors: ["T4", "T8"] },
-  { id: "T8", name: "Central River", ownerId: "neutral", strength: 3, neighbors: ["T5", "T7", "T9"] },
-  { id: "T9", name: "Southeast Delta", ownerId: "wu", strength: 5, neighbors: ["T6", "T8"] }
+  { id: "YZ", name: "Youzhou (幽州)", ownerId: "wei", strength: 4, neighbors: ["BZ", "JZ"], grid: {row: 0, col: 2} },
+  { id: "BZ", name: "Bingzhou (并州)", ownerId: "wei", strength: 3, neighbors: ["YZ", "JZ", "SZ", "LZ"], grid: {row: 1, col: 1} },
+  { id: "JZ", name: "Jizhou (冀州)", ownerId: "wei", strength: 4, neighbors: ["YZ", "BZ", "SZ", "YZ2", "QZ"], grid: {row: 1, col: 2} },
+  { id: "QZ", name: "Qingzhou (青州)", ownerId: "wei", strength: 3, neighbors: ["JZ", "YZ2", "XZ"], grid: {row: 1, col: 3} },
+  { id: "YZ2", name: "Yanzhou (兗州)", ownerId: "neutral", strength: 4, neighbors: ["JZ", "QZ", "XZ", "YZ3", "SZ"], grid: {row: 2, col: 2} },
+  { id: "XZ", name: "Xuzhou (徐州)", ownerId: "neutral", strength: 3, neighbors: ["QZ", "YZ2", "YZ3", "YGZ2"], grid: {row: 2, col: 3} },
+  { id: "YZ3", name: "Yuzhou (豫州)", ownerId: "neutral", strength: 4, neighbors: ["YZ2", "XZ", "YGZ2", "JGZ", "SZ"], grid: {row: 3, col: 2} },
+  { id: "SZ", name: "Sili (司隶)", ownerId: "neutral", strength: 5, neighbors: ["BZ", "JZ", "YZ2", "YZ3", "YGZ", "LZ"], grid: {row: 2, col: 1} },
+  { id: "LZ", name: "Liangzhou (凉州)", ownerId: "shu", strength: 5, neighbors: ["BZ", "SZ", "YGZ"], grid: {row: 1, col: 0} },
+  { id: "YGZ", name: "Yongzhou (雍州)", ownerId: "shu", strength: 4, neighbors: ["LZ", "SZ", "YIZ"], grid: {row: 3, col: 0} },
+  { id: "YIZ", name: "Yizhou (益州)", ownerId: "shu", strength: 4, neighbors: ["YGZ", "JGZ"], grid: {row: 4, col: 0} },
+  { id: "JGZ", name: "Jingzhou (荆州)", ownerId: "neutral", strength: 4, neighbors: ["YIZ", "YZ3", "YGZ2", "JAZ"], grid: {row: 4, col: 1} },
+  { id: "YGZ2", name: "Yangzhou (扬州)", ownerId: "wu", strength: 3, neighbors: ["XZ", "YZ3", "JGZ", "GZ"], grid: {row: 4, col: 2} },
+  { id: "JAZ", name: "Jiaozhou (交州)", ownerId: "wu", strength: 3, neighbors: ["JGZ", "GZ"], grid: {row: 5, col: 1} },
+  { id: "GZ", name: "Guangzhou (广州)", ownerId: "wu", strength: 3, neighbors: ["YGZ2", "JAZ"], grid: {row: 5, col: 2} },
 ];
 
 // --- Global Game State ---
@@ -75,17 +81,19 @@ function getKingdomById(id) {
   return gameData.kingdoms.find(k => k.id === id);
 }
 
-// Render the map UI for the 9-territory grid map
+// Render the map UI for the 15-province grid map
 function renderMap() {
   const map = document.getElementById('game-map');
   map.innerHTML = '';
 
-  // 3x3 grid
-  const gridOrder = [
-    ["T1", "T2", "T3"],
-    ["T4", "T5", "T6"],
-    ["T7", "T8", "T9"]
-  ];
+  // 4x6 grid
+  const maxCols = 4;
+  const maxRows = 6;
+  // Build a lookup for quick placement
+  const gridLookup = {};
+  gameData.territories.forEach(t => {
+    gridLookup[`${t.grid.row},${t.grid.col}`] = t;
+  });
 
   // Determine attackable neighbors if a player-owned territory is selected
   let attackableIds = [];
@@ -97,10 +105,10 @@ function renderMap() {
       .map(t => t.id);
   }
 
-  for (let row = 0; row < 3; row++) {
-    for (let col = 0; col < 3; col++) {
-      const tid = gridOrder[row][col];
-      const territory = gameData.territories.find(t => t.id === tid);
+  for (let row = 0; row < maxRows; row++) {
+    for (let col = 0; col < maxCols; col++) {
+      const key = `${row},${col}`;
+      const territory = gridLookup[key];
       if (territory) {
         // Determine owner and color
         let owner = getKingdomById(territory.ownerId);
@@ -128,7 +136,7 @@ function renderMap() {
 
         // Create territory div
         const div = document.createElement('div');
-        div.className = `rounded-lg shadow-md flex flex-col items-center justify-center p-4 h-28 text-base ${textColor} ${border} ${extraStyle}`;
+        div.className = `rounded-lg shadow-md flex flex-col items-center justify-center p-4 h-24 text-xs sm:text-sm md:text-base ${textColor} ${border} ${extraStyle} col-start-${col+1} row-start-${row+1}`;
         div.style.background = bgColor;
         div.innerHTML = `<div class=\"font-bold text-center\">${territory.name}</div><div>Strength: ${territory.strength}</div>`;
         if (clickable && gameData.currentPlayerId === gameData.playerKingdomId) {
@@ -142,6 +150,7 @@ function renderMap() {
       } else {
         // Empty cell
         const div = document.createElement('div');
+        div.className = `col-start-${col+1} row-start-${row+1}`;
         map.appendChild(div);
       }
     }
