@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Strategist's Gauntlet: Three Kingdoms Mini-War</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚔️</text></svg>">
+  <style>
+    #svg-map path {
+      transition: filter 0.2s, stroke 0.2s;
+    }
+    #svg-map path:hover {
+      filter: drop-shadow(0 0 8px gold);
+      stroke: gold !important;
+      stroke-width: 5 !important;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body class="bg-gradient-to-br from-blue-100 to-green-100 min-h-screen flex flex-col items-center justify-center">
+  <div class="w-full max-w-5xl mx-auto flex flex-col items-center">
+    <h1 class="text-3xl md:text-4xl font-extrabold text-center text-gray-800 mt-6 mb-2">Strategist's Gauntlet: Three Kingdoms Mini-War</h1>
+    <p class="text-center text-gray-600 mb-4">Choose your kingdom and conquer ancient China! Click a province to select, then reinforce or attack. Be the last kingdom standing or control the most provinces after 20 turns.</p>
+  </div>
+  <div id="kingdom-select-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div class="bg-white p-8 rounded-lg shadow-lg text-center">
+      <div class="mb-4 text-xl font-bold">Choose Your Kingdom</div>
+      <div class="flex gap-4 justify-center">
+        <button id="choose-wei" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Wei</button>
+        <button id="choose-shu" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">Shu</button>
+        <button id="choose-wu" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">Wu</button>
+      </div>
+      
+    </div>
+  </div>
+  <div id="game-container" class="bg-white rounded-lg shadow-md p-6 w-full max-w-5xl flex flex-col gap-4 items-center">
+    <div id="info-panel" class="mb-2"></div>
+    <div id="svg-map-container" class="w-full h-96 flex items-center justify-center mb-2">
+      <!-- SVG map of 5 provinces: Youzhou, Bingzhou, Jizhou, Yanzhou, Sili -->
+      <svg id="svg-map" viewBox="0 0 500 300" class="w-full h-full">
+        <!-- Youzhou -->
+        <path id="YZ" d="M60,40 L160,40 L160,120 L60,120 Z" />
+        <text x="110" y="85" text-anchor="middle" font-size="18" fill="#222" font-weight="bold">Youzhou</text>
+        <!-- Bingzhou -->
+        <path id="BZ" d="M170,40 L270,40 L270,120 L170,120 Z" />
+        <text x="220" y="85" text-anchor="middle" font-size="18" fill="#222" font-weight="bold">Bingzhou</text>
+        <!-- Jizhou -->
+        <path id="JZ" d="M60,130 L160,130 L160,210 L60,210 Z" />
+        <text x="110" y="175" text-anchor="middle" font-size="18" fill="#222" font-weight="bold">Jizhou</text>
+        <!-- Yanzhou -->
+        <path id="YZ2" d="M170,130 L270,130 L270,210 L170,210 Z" />
+        <text x="220" y="175" text-anchor="middle" font-size="18" fill="#222" font-weight="bold">Yanzhou</text>
+        <!-- Sili -->
+        <path id="SZ" d="M280,85 L380,85 L380,165 L280,165 Z" />
+        <text x="330" y="130" text-anchor="middle" font-size="18" fill="#222" font-weight="bold">Sili</text>
+      </svg>
+    </div>
+    <div id="control-panel" class="flex gap-2 mb-2"></div>
+    <div id="game-log" class="bg-gray-200 rounded p-2 h-32 overflow-y-auto text-sm"></div>
+  </div>
+  <div id="game-over-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden">
+    <div class="bg-white p-8 rounded-lg shadow-lg text-center">
+      <div id="game-over-message" class="mb-4 text-xl font-bold"></div>
+      <button id="btn-restart" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Play Again</button>
+    </div>
+  </div>
+  <script src="main.js"></script>
+</body>
+</html> 
