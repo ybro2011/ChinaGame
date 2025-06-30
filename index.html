@@ -36,26 +36,7 @@
   </div>
   <div id="game-container" class="bg-white rounded-lg shadow-md p-6 w-full max-w-5xl flex flex-col gap-4 items-center">
     <div id="info-panel" class="mb-2"></div>
-    <div id="svg-map-container" class="w-full h-96 flex items-center justify-center mb-2">
-      <!-- SVG map of 5 provinces: Youzhou, Bingzhou, Jizhou, Yanzhou, Sili -->
-      <svg id="svg-map" viewBox="0 0 500 300" class="w-full h-full">
-        <!-- Youzhou -->
-        <path id="YZ" d="M60,40 L160,40 L160,120 L60,120 Z" />
-        <text x="110" y="85" text-anchor="middle" font-size="18" fill="#222" font-weight="bold">Youzhou</text>
-        <!-- Bingzhou -->
-        <path id="BZ" d="M170,40 L270,40 L270,120 L170,120 Z" />
-        <text x="220" y="85" text-anchor="middle" font-size="18" fill="#222" font-weight="bold">Bingzhou</text>
-        <!-- Jizhou -->
-        <path id="JZ" d="M60,130 L160,130 L160,210 L60,210 Z" />
-        <text x="110" y="175" text-anchor="middle" font-size="18" fill="#222" font-weight="bold">Jizhou</text>
-        <!-- Yanzhou -->
-        <path id="YZ2" d="M170,130 L270,130 L270,210 L170,210 Z" />
-        <text x="220" y="175" text-anchor="middle" font-size="18" fill="#222" font-weight="bold">Yanzhou</text>
-        <!-- Sili -->
-        <path id="SZ" d="M280,85 L380,85 L380,165 L280,165 Z" />
-        <text x="330" y="130" text-anchor="middle" font-size="18" fill="#222" font-weight="bold">Sili</text>
-      </svg>
-    </div>
+    <div id="game-map" class="grid grid-cols-4 grid-rows-7 gap-4 mb-2"></div>
     <div id="control-panel" class="flex gap-2 mb-2"></div>
     <div id="game-log" class="bg-gray-200 rounded p-2 h-32 overflow-y-auto text-sm"></div>
   </div>

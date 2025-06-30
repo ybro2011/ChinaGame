@@ -5,24 +5,17 @@ const initialKingdoms = [
   { id: "wu", name: "Wu Kingdom", color: "#f56565", type: "ai", units: 10 },
 ];
 
-// --- Ancient China Provinces (Three Kingdoms Era) ---
-// Each territory has: id, name (English + Chinese), ownerId, strength, neighbors, grid position
+// --- Original 9-territory map ---
 const initialTerritories = [
-  { id: "YZ", name: "Youzhou (幽州 Yōuzhōu)", ownerId: "wei", strength: 4, neighbors: ["BZ", "JZ"], grid: {row: 1, col: 2} },
-  { id: "BZ", name: "Bingzhou (并州 Bìngzhōu)", ownerId: "wei", strength: 3, neighbors: ["YZ", "JZ", "SZ", "LZ"], grid: {row: 2, col: 1} },
-  { id: "JZ", name: "Jizhou (冀州 Jìzhōu)", ownerId: "wei", strength: 4, neighbors: ["YZ", "BZ", "SZ", "YZ2", "QZ"], grid: {row: 2, col: 2} },
-  { id: "QZ", name: "Qingzhou (青州 Qīngzhōu)", ownerId: "wei", strength: 3, neighbors: ["JZ", "YZ2", "XZ"], grid: {row: 2, col: 3} },
-  { id: "YZ2", name: "Yanzhou (兗州 Yǎnzhōu)", ownerId: "neutral", strength: 4, neighbors: ["JZ", "QZ", "XZ", "YZ3", "SZ"], grid: {row: 3, col: 2} },
-  { id: "XZ", name: "Xuzhou (徐州 Xúzhōu)", ownerId: "neutral", strength: 3, neighbors: ["QZ", "YZ2", "YZ3", "YGZ2"], grid: {row: 3, col: 3} },
-  { id: "YZ3", name: "Yuzhou (豫州 Yùzhōu)", ownerId: "neutral", strength: 4, neighbors: ["YZ2", "XZ", "YGZ2", "JGZ", "SZ"], grid: {row: 4, col: 2} },
-  { id: "SZ", name: "Sili (司隶 Sīlì)", ownerId: "neutral", strength: 5, neighbors: ["BZ", "JZ", "YZ2", "YZ3", "YGZ", "LZ"], grid: {row: 3, col: 1} },
-  { id: "LZ", name: "Liangzhou (凉州 Liángzhōu)", ownerId: "shu", strength: 5, neighbors: ["BZ", "SZ", "YGZ"], grid: {row: 2, col: 0} },
-  { id: "YGZ", name: "Yongzhou (雍州 Yōngzhōu)", ownerId: "shu", strength: 4, neighbors: ["LZ", "SZ", "YIZ"], grid: {row: 4, col: 0} },
-  { id: "YIZ", name: "Yizhou (益州 Yìzhōu)", ownerId: "shu", strength: 4, neighbors: ["YGZ", "JGZ"], grid: {row: 5, col: 0} },
-  { id: "JGZ", name: "Jingzhou (荆州 Jīngzhōu)", ownerId: "neutral", strength: 4, neighbors: ["YIZ", "YZ3", "YGZ2", "JAZ"], grid: {row: 5, col: 1} },
-  { id: "YGZ2", name: "Yangzhou (扬州 Yángzhōu)", ownerId: "wu", strength: 3, neighbors: ["XZ", "YZ3", "JGZ", "GZ"], grid: {row: 5, col: 2} },
-  { id: "JAZ", name: "Jiaozhou (交州 Jiāozhōu)", ownerId: "wu", strength: 3, neighbors: ["JGZ", "GZ"], grid: {row: 6, col: 1} },
-  { id: "GZ", name: "Guangzhou (广州 Guǎngzhōu)", ownerId: "wu", strength: 3, neighbors: ["YGZ2", "JAZ"], grid: {row: 6, col: 2} },
+  { id: "T1", name: "Northern Plains", ownerId: "wei", strength: 4, neighbors: ["T2", "T4"] },
+  { id: "T2", name: "Central Hills", ownerId: "wei", strength: 3, neighbors: ["T1", "T3", "T5"] },
+  { id: "T3", name: "Eastern Coast", ownerId: "wei", strength: 4, neighbors: ["T2", "T6"] },
+  { id: "T4", name: "Western Mountains", ownerId: "shu", strength: 5, neighbors: ["T1", "T5", "T7"] },
+  { id: "T5", name: "Heartland", ownerId: "neutral", strength: 3, neighbors: ["T2", "T4", "T6", "T8"] },
+  { id: "T6", name: "Southern Coast", ownerId: "wu", strength: 4, neighbors: ["T3", "T5", "T9"] },
+  { id: "T7", name: "Southwest Jungles", ownerId: "shu", strength: 4, neighbors: ["T4", "T8"] },
+  { id: "T8", name: "Central River", ownerId: "neutral", strength: 3, neighbors: ["T5", "T7", "T9"] },
+  { id: "T9", name: "Southeast Delta", ownerId: "wu", strength: 5, neighbors: ["T6", "T8"] }
 ];
 
 // --- Global Game State ---
@@ -82,26 +75,77 @@ function getKingdomById(id) {
   return gameData.kingdoms.find(k => k.id === id);
 }
 
-// --- SVG Map Coloring and Interactivity ---
-function colorSVGMap() {
-  if (!document.getElementById('svg-map')) return;
-  gameData.territories.forEach(territory => {
-    const path = document.getElementById(territory.id);
-    if (path) {
-      let owner = getKingdomById(territory.ownerId);
-      path.setAttribute('fill', owner ? owner.color : '#a0aec0');
-      path.setAttribute('stroke', territory.id === gameData.selectedOwnedTerritoryId ? 'yellow' :
-                                 territory.id === gameData.selectedTargetTerritoryId ? 'red' : '#222');
-      path.setAttribute('stroke-width', territory.id === gameData.selectedOwnedTerritoryId || territory.id === gameData.selectedTargetTerritoryId ? 4 : 1);
-      path.onclick = () => handleTerritoryClick(territory.id);
-      path.style.cursor = 'pointer';
-    }
-  });
-}
-
-// --- Override renderMap to just color the SVG map ---
+// Render the map UI for the 9-territory grid map
 function renderMap() {
-  colorSVGMap();
+  const map = document.getElementById('game-map');
+  map.innerHTML = '';
+
+  // 3x3 grid
+  const gridOrder = [
+    ["T1", "T2", "T3"],
+    ["T4", "T5", "T6"],
+    ["T7", "T8", "T9"]
+  ];
+
+  // Determine attackable neighbors if a player-owned territory is selected
+  let attackableIds = [];
+  if (gameData.selectedOwnedTerritoryId) {
+    const owned = gameData.territories.find(t => t.id === gameData.selectedOwnedTerritoryId);
+    attackableIds = owned.neighbors
+      .map(nid => gameData.territories.find(t => t.id === nid))
+      .filter(t => t.ownerId !== gameData.playerKingdomId)
+      .map(t => t.id);
+  }
+
+  for (let row = 0; row < 3; row++) {
+    for (let col = 0; col < 3; col++) {
+      const tid = gridOrder[row][col];
+      const territory = gameData.territories.find(t => t.id === tid);
+      if (territory) {
+        // Determine owner and color
+        let owner = getKingdomById(territory.ownerId);
+        let bgColor = owner ? owner.color : '#a0aec0';
+        let textColor = 'text-white';
+        if (!owner) textColor = 'text-gray-800';
+
+        // Highlight if selected or attackable
+        let border = '';
+        let extraStyle = '';
+        let clickable = false;
+        if (territory.id === gameData.selectedOwnedTerritoryId) {
+          border = 'ring-4 ring-yellow-400';
+          clickable = true;
+        } else if (territory.id === gameData.selectedTargetTerritoryId) {
+          border = 'ring-4 ring-red-400';
+        } else if (attackableIds.includes(territory.id)) {
+          border = 'ring-4 ring-blue-400';
+          clickable = true;
+        } else if (territory.ownerId === gameData.playerKingdomId && !gameData.selectedOwnedTerritoryId) {
+          clickable = true;
+        } else if (gameData.selectedOwnedTerritoryId) {
+          extraStyle = 'opacity-40 pointer-events-none';
+        }
+
+        // Create territory div
+        const div = document.createElement('div');
+        div.className = `rounded-lg shadow-md flex flex-col items-center justify-center p-4 h-28 text-base ${textColor} ${border} ${extraStyle}`;
+        div.style.background = bgColor;
+        div.innerHTML = `<div class=\"font-bold text-center\">${territory.name}</div><div>Strength: ${territory.strength}</div>`;
+        if (clickable && gameData.currentPlayerId === gameData.playerKingdomId) {
+          div.classList.add('cursor-pointer');
+          div.onclick = () => handleTerritoryClick(territory.id);
+        } else {
+          div.classList.remove('cursor-pointer');
+          div.onclick = null;
+        }
+        map.appendChild(div);
+      } else {
+        // Empty cell
+        const div = document.createElement('div');
+        map.appendChild(div);
+      }
+    }
+  }
   renderControlPanel();
 }
 
