@@ -298,6 +298,15 @@ function handleAttack() {
 
 // End the player's turn
 function endPlayerTurn() {
+  // Give player units equal to one third of their territories (rounded down)
+  const player = getKingdomById(gameData.playerKingdomId);
+  const playerTerritories = gameData.territories.filter(t => t.ownerId === gameData.playerKingdomId).length;
+  const gainedUnits = Math.floor(playerTerritories / 3);
+  if (gainedUnits > 0) {
+    player.units += gainedUnits;
+    addGameLog(`You gained ${gainedUnits} units for controlling ${playerTerritories} territories.`);
+  }
+
   // Reset selections
   gameData.selectedOwnedTerritoryId = null;
   gameData.selectedTargetTerritoryId = null;
